@@ -1,6 +1,5 @@
 package com.setas.setas_backend.domain.model;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
