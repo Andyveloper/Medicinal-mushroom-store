@@ -9,6 +9,8 @@ import com.setas.setas_backend.infrastructure.web.dto.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +28,11 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> save(@RequestBody Order order) {
-        Order created = createOrder.execute(order);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        assert authentication != null;
+        String email = (String) authentication.getPrincipal();
+        Order created = createOrder.execute(order, email);
         return ResponseEntity.status(HttpStatus.CREATED).body(new OrderResponse(created));
     }
 
