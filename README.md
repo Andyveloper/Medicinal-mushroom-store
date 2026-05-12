@@ -1,6 +1,6 @@
 # Setas Backend
 
-REST API para una tienda en línea construida con **Spring Boot** siguiendo arquitectura hexagonal (Ports & Adapters).
+REST API para una tienda en línea de hongos medicinales construida con **Spring Boot** siguiendo arquitectura hexagonal (Ports & Adapters). Incluye integración con **Stripe** para pagos en línea.
 
 ## Tech Stack
 
@@ -8,6 +8,8 @@ REST API para una tienda en línea construida con **Spring Boot** siguiendo arqu
 - Spring Boot 4.0.5 (Spring 6 / Jakarta EE)
 - Spring Security + JWT
 - Spring Data JPA + PostgreSQL
+- Stripe Java SDK 26.3.0
+- Spring Boot Actuator
 - Lombok
 - JUnit 5
 
@@ -16,15 +18,19 @@ REST API para una tienda en línea construida con **Spring Boot** siguiendo arqu
 - Java 17+
 - PostgreSQL corriendo en `localhost:5432`
 - Base de datos `setas_db` creada
+- Cuenta de Stripe (claves de API)
 
 ## Configuración
 
-Edita `src/main/resources/application.properties` con tus credenciales de base de datos:
+Edita `src/main/resources/application.properties` con tus credenciales:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/setas_db
 spring.datasource.username=postgres
 spring.datasource.password=tu_password
+
+stripe.secret.key=sk_test_...
+stripe.webhook.secret=whsec_...
 ```
 
 > El esquema se gestiona automáticamente con `ddl-auto=update`.
@@ -74,6 +80,36 @@ La API queda disponible en `http://localhost:8080`.
 | GET | `/api/orders/user/{userId}` | Listar órdenes de un usuario |
 | PUT | `/api/orders/{orderId}/status` | Actualizar estado (`?status=PENDING\|PAID\|CANCELLED`) |
 
+### Pagos (`/api/payments`)
+
+| Método | Ruta | Rol | Descripción |
+|--------|------|-----|-------------|
+| POST | `/api/payments/{orderId}` | CLIENT | Crear PaymentIntent de Stripe para la orden |
+
+Respuesta:
+```json
+{
+  "clientSecret": "pi_xxx_secret_xxx",
+  "orderId": 1
+}
+```
+
+### Webhooks (`/api/webhooks`)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/webhooks/stripe` | Recibir eventos de Stripe (público, validado por firma) |
+
+Eventos manejados:
+- `payment_intent.succeeded` → actualiza la orden a `PAID` y reduce el stock de los productos.
+
+## Flujo de pago
+
+1. El cliente crea una orden (`POST /api/orders`).
+2. El cliente solicita un PaymentIntent (`POST /api/payments/{orderId}`) → recibe un `clientSecret`.
+3. El frontend completa el pago con Stripe usando el `clientSecret`.
+4. Stripe notifica al backend vía webhook → la orden pasa a `PAID` y se descuenta el stock.
+
 ## Autenticación
 
 El registro y login devuelven un token JWT. Inclúyelo en las peticiones protegidas:
@@ -100,5 +136,5 @@ infrastructure/
   web/            ← Controllers REST (adaptadores de entrada)
   web/dto/        ← DTOs de respuesta
 
-config/           ← SecurityConfig, JwtService, JwtAuthFilter
+config/           ← SecurityConfig, JwtService, JwtAuthFilter, StripeService
 ```
