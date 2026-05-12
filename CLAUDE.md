@@ -21,7 +21,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./mvnw compile
 ```
 
-## Architecture: Hexagonal (Ports & Adapters)
+## Architecture: Clean Architecture + Ports & Adapters (Hexagonal)
+
+Both patterns are complementary: Clean Architecture defines the layers and the dependency rule (always inward), while Hexagonal defines how those layers communicate with the outside world through ports and adapters.
 
 The project enforces a strict layered structure under `src/main/java/com/setas/setas_backend/`:
 
@@ -50,6 +52,10 @@ config/          ← SecurityConfig, JwtService, JwtAuthFilter, StripeService
 ```
 
 **Key rule:** The `domain/` layer must remain free of framework coupling. Spring and JPA annotations belong only in `infrastructure/` and `config/`.
+
+- `domain/` maps to the **Entity layer** of Clean Architecture; `port/in/` and `port/out/` are the **ports** of Hexagonal.
+- `application/` maps to the **Use Case layer** of Clean Architecture.
+- `infrastructure/` holds the **adapters** (Hexagonal) / **Frameworks & Drivers** (Clean Architecture).
 
 ## Domain Models
 

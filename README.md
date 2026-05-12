@@ -122,16 +122,18 @@ Los roles disponibles son `ADMIN` y `CLIENT`.
 
 ## Arquitectura
 
-```
-domain/           ← Lógica de negocio pura (sin dependencias de framework)
-  model/          ← Entidades: Product, User, Order, OrderItem
-  port/in/        ← Interfaces de casos de uso
-  port/out/       ← Interfaces de repositorios
+El proyecto implementa **Clean Architecture con Ports & Adapters (Hexagonal)**. Ambos patrones son complementarios: Clean Architecture define las capas y la regla de dependencias (siempre hacia adentro), mientras que Hexagonal define cómo esas capas se comunican con el exterior a través de puertos y adaptadores.
 
-application/
+```
+domain/           ← Entidades y contratos (Clean Architecture: Entity layer)
+  model/          ← Entidades: Product, User, Order, OrderItem
+  port/in/        ← Puertos de entrada: interfaces de casos de uso (Hexagonal)
+  port/out/       ← Puertos de salida: interfaces de repositorios (Hexagonal)
+
+application/      ← Lógica de aplicación (Clean Architecture: Use Case layer)
   usecase/        ← Implementación de los casos de uso
 
-infrastructure/
+infrastructure/   ← Adaptadores (Hexagonal) / Frameworks & Drivers (Clean Architecture)
   persistence/    ← Adaptadores JPA (implementan los puertos de salida)
   web/            ← Controllers REST (adaptadores de entrada)
   web/dto/        ← DTOs de respuesta
