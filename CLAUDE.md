@@ -36,17 +36,17 @@ application/
   usecase/
     product/     ← CreateProduct, DeleteProduct, GetProducts
     user/        ← RegisterUser, LoginUser, DeleteUser, FindByEmailUser
-    order/       ← CreateOrder, GetOrders, UpdateOrder
+    order/       ← CreateOrder, GetOrders, UpdateOrder, ReduceStock, UpdateOrderPaymentIntent
 
 infrastructure/
   persistence/
     product/     ← JpaProductRepository, ProductRepositoryImpl
     user/        ← JpaUserRepository, UserRepositoryImpl
     order/       ← JpaOrderRepository, OrderRepositoryImpl
-  web/           ← REST controllers (ProductController, AuthController, OrderController)
-    dto/         ← Response DTOs (AuthResponse, OrderResponse, OrderItemResponse)
+  web/           ← REST controllers (ProductController, AuthController, OrderController, PaymentController, WebhookController)
+    dto/         ← Response DTOs (AuthResponse, OrderResponse, OrderItemResponse, PaymentResponse)
 
-config/          ← SecurityConfig, JwtService, JwtAuthFilter
+config/          ← SecurityConfig, JwtService, JwtAuthFilter, StripeService
 ```
 
 **Key rule:** The `domain/` layer must remain free of framework coupling. Spring and JPA annotations belong only in `infrastructure/` and `config/`.
@@ -60,7 +60,7 @@ config/          ← SecurityConfig, JwtService, JwtAuthFilter
 - `id` (Long), `name`, `lastname`, `email` (unique), `password` (write-only), `phoneNumber` (Long), `imageUrl`, `role` (enum: `ADMIN`, `CLIENT`), `active` (Boolean, default `true`)
 
 ### Order (`domain/model/Order.java`)
-- `id` (Long), `user` (ManyToOne), `totalPrice` (BigDecimal), `status` (enum: `PENDING`, `PAID`, `CANCELLED`), `createdAt` (LocalDateTime), `orderItems` (OneToMany)
+- `id` (Long), `user` (ManyToOne), `totalPrice` (BigDecimal), `status` (enum: `PENDING`, `PAID`, `CANCELLED`), `createdAt` (LocalDateTime), `orderItems` (OneToMany), `paymentIntentId` (String)
 
 ### OrderItem (`domain/model/OrderItem.java`)
 - Belongs to an Order; references a Product with quantity and unit price.
@@ -73,7 +73,7 @@ All models use Lombok: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsCons
 |---|---|
 | `IProductRepository` | `save`, `deleteById`, `findById`, `findAll`, `findAllActive` |
 | `IUserRepository` | `save`, `deleteById`, `findById`, `findByEmail` |
-| `IOrderRepository` | `save`, `findById`, `findByUserId` / `findAll`, `updateStatus` |
+| `IOrderRepository` | `save`, `findById`, `findByUserId` / `findAll`, `updateStatus`, `updatePaymentIntentId` |
 
 ## REST API Endpoints
 
@@ -92,16 +92,22 @@ All models use Lombok: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsCons
 | GET | `/api/orders/{id}` | Get order by id |
 | GET | `/api/orders/user/{userId}` | Get orders by user |
 | PUT | `/api/orders/{orderId}/status` | Update order status (`?status=PENDING\|PAID\|CANCELLED`) |
+| POST | `/api/payments/{orderId}` | Create Stripe PaymentIntent for an order (CLIENT) |
+| POST | `/api/webhooks/stripe` | Handle Stripe webhook events (public) |
 
 ## Security
 
 JWT-based authentication via `JwtService` and `JwtAuthFilter`. Tokens include email and role claims. Configuration in `config/SecurityConfig.java`.
+
+`/api/payments/**` requires `CLIENT` role. `/api/webhooks/**` is public (validated by Stripe signature).
 
 ## Tech Stack
 
 - **Java 17**, **Spring Boot 4.0.5** (Spring 6 / Jakarta EE)
 - **Spring Data JPA** + **PostgreSQL** (`localhost:5432/setas_db`)
 - **Spring Security** + **JWT**
+- **Stripe Java SDK** (`stripe-java 26.3.0`) — payments and webhooks
+- **Spring Boot Actuator** + **Jackson Databind**
 - **Lombok**
 - **JUnit 5** for tests
 
