@@ -9,4 +9,6 @@ public interface IGetOrders {
   Optional<Order> getById(Long id);
 
   List<Order> getByUserEmail(String userEmail);
+
+  List<Order> getAll();
 }

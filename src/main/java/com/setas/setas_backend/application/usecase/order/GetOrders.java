@@ -27,4 +27,10 @@ public class GetOrders implements IGetOrders {
   public List<Order> getByUserEmail(String userEmail) {
     return orderRepository.findByUserEmail(userEmail);
   }
+
+  @Override
+  @Transactional
+  public List<Order> getAll() {
+    return orderRepository.getAll();
+  }
 }

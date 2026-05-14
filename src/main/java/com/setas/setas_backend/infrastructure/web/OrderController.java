@@ -36,6 +36,12 @@ public class OrderController {
     return ResponseEntity.status(HttpStatus.CREATED).body(new OrderResponse(created));
   }
 
+  @GetMapping
+  @Transactional
+  public ResponseEntity<List<OrderResponse>> getAll() {
+    return ResponseEntity.ok(getOrders.getAll().stream().map(OrderResponse::new).toList());
+  }
+
   @GetMapping("/{id}")
   @Transactional
   public ResponseEntity<OrderResponse> getById(@PathVariable Long id) {

@@ -17,4 +17,6 @@ public interface IOrderRepository {
 
   Order updatePaymentIntentId(Long orderId, String paymentIntentId);
 
+  List<Order> getAll();
+
 }
