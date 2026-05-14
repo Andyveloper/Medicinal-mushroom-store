@@ -27,8 +27,8 @@ public class OrderRepositoryImpl implements IOrderRepository {
   }
 
   @Override
-  public List<Order> findByUserId(Long userId) {
-    return jpaOrderRepository.findByUserId(userId);
+  public List<Order> findByUserEmail(String userEmail) {
+    return jpaOrderRepository.findByUserEmail(userEmail);
   }
 
   @Override

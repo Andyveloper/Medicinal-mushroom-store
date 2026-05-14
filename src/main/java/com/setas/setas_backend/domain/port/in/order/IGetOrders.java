@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IGetOrders {
-    Optional<Order> getById(Long id);
-    List<Order> getByUserId(Long id);
+  Optional<Order> getById(Long id);
+
+  List<Order> getByUserEmail(String userEmail);
 }

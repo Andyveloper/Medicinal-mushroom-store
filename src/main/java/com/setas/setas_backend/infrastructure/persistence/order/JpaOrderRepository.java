@@ -12,8 +12,8 @@ import java.util.List;
 
 public interface JpaOrderRepository extends JpaRepository<Order, Long> {
 
-  @Query("SELECT o FROM Order o WHERE o.user.id = :userId")
-  List<Order> findByUserId(@Param("userId") Long userId);
+  @Query("SELECT o FROM Order o WHERE o.user.email = :userEmail")
+  List<Order> findByUserEmail(@Param("userEmail") String userEmail);
 
   @Modifying
   @Transactional
@@ -24,5 +24,5 @@ public interface JpaOrderRepository extends JpaRepository<Order, Long> {
   @Transactional
   @Query("UPDATE Order o SET o.paymentIntentId = :paymentIntentId WHERE o.id = :orderId")
   void updatePaymentIntentId(@Param("orderId") Long orderId, @Param("paymentIntentId") String paymentIntentId);
-    
+
 }

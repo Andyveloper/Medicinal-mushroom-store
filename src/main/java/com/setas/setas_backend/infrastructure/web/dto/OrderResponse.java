@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record OrderResponse(Long id, Long userId, BigDecimal totalPrice, OrderStatus status, LocalDateTime createdAt,
-                            List<OrderItemResponse> item) {
+                            List<OrderItemResponse> items) {
   public OrderResponse(Order order) {
     this(
             order.getId(),

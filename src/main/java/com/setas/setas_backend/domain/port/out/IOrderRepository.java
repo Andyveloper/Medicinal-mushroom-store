@@ -11,7 +11,7 @@ public interface IOrderRepository {
 
   Optional<Order> findById(Long id);
 
-  List<Order> findByUserId(Long userId);
+  List<Order> findByUserEmail(String userEmail);
 
   Optional<Order> updateStatus(Long orderId, OrderStatus status);
 

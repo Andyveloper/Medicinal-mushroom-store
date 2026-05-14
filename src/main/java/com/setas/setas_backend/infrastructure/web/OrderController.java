@@ -22,40 +22,42 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final ICreateOrder createOrder;
-    private final IGetOrders getOrders;
-    private final IUpdateOrderStatus updateOrderStatus;
+  private final ICreateOrder createOrder;
+  private final IGetOrders getOrders;
+  private final IUpdateOrderStatus updateOrderStatus;
 
-    @PostMapping
-    public ResponseEntity<OrderResponse> save(@RequestBody Order order) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+  @PostMapping
+  public ResponseEntity<OrderResponse> save(@RequestBody Order order) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        assert authentication != null;
-        String email = (String) authentication.getPrincipal();
-        Order created = createOrder.execute(order, email);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new OrderResponse(created));
-    }
+    assert authentication != null;
+    String email = (String) authentication.getPrincipal();
+    Order created = createOrder.execute(order, email);
+    return ResponseEntity.status(HttpStatus.CREATED).body(new OrderResponse(created));
+  }
 
-    @GetMapping("/{id}")
-    @Transactional
-    public ResponseEntity<OrderResponse> getById(@PathVariable Long id) {
-        return getOrders.getById(id)
-                .map(order -> ResponseEntity.status(HttpStatus.OK)
-                        .body(new OrderResponse(order)))
-                .orElse(ResponseEntity.notFound().build());
-    }
+  @GetMapping("/{id}")
+  @Transactional
+  public ResponseEntity<OrderResponse> getById(@PathVariable Long id) {
+    return getOrders.getById(id)
+            .map(order -> ResponseEntity.status(HttpStatus.OK)
+                    .body(new OrderResponse(order)))
+            .orElse(ResponseEntity.notFound().build());
+  }
 
-    @GetMapping("/user/{userId}")
-    @Transactional
-    public ResponseEntity<List<OrderResponse>> getByUserId(@PathVariable Long userId) {
-        List<OrderResponse> found = getOrders.getByUserId(userId).stream().map(OrderResponse::new).toList();
-        return ResponseEntity.ok(found);
-    }
+  @GetMapping("/user")
+  @Transactional
+  public ResponseEntity<List<OrderResponse>> getByUserEmail() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    assert authentication != null;
+    String email = (String) authentication.getPrincipal();
+    return ResponseEntity.ok(getOrders.getByUserEmail(email).stream().map(OrderResponse::new).toList());
+  }
 
-    @PutMapping("/{orderId}/status")
-    @Transactional
-    public ResponseEntity<Order> updateStatus(@PathVariable Long orderId, @RequestParam OrderStatus status) {
-        Optional<Order> updated = updateOrderStatus.execute(orderId, status);
-        return updated.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NO_CONTENT).build());
-    }
+  @PutMapping("/{orderId}/status")
+  @Transactional
+  public ResponseEntity<Order> updateStatus(@PathVariable Long orderId, @RequestParam OrderStatus status) {
+    Optional<Order> updated = updateOrderStatus.execute(orderId, status);
+    return updated.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NO_CONTENT).build());
+  }
 }

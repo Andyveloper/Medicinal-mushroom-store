@@ -14,17 +14,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class GetOrders implements IGetOrders {
 
-    private final IOrderRepository orderRepository;
+  private final IOrderRepository orderRepository;
 
-    @Override
-    @Transactional
-    public Optional<Order> getById(Long id) {
-        return orderRepository.findById(id);
-    }
+  @Override
+  @Transactional
+  public Optional<Order> getById(Long id) {
+    return orderRepository.findById(id);
+  }
 
-    @Override
-    @Transactional
-    public List<Order> getByUserId(Long id) {
-        return orderRepository.findByUserId(id);
-    }
+  @Override
+  @Transactional
+  public List<Order> getByUserEmail(String userEmail) {
+    return orderRepository.findByUserEmail(userEmail);
+  }
 }
