@@ -36,7 +36,7 @@ domain/          ← Core business logic; no Spring dependencies
 
 application/
   usecase/
-    product/     ← CreateProduct, DeleteProduct, GetProducts
+    product/     ← CreateProduct, DeleteProduct, GetProducts, UpdateProduct
     user/        ← RegisterUser, LoginUser, DeleteUser, FindByEmailUser
     order/       ← CreateOrder, GetOrders, UpdateOrder, ReduceStock, UpdateOrderPaymentIntent
 
@@ -77,9 +77,9 @@ All models use Lombok: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsCons
 
 | Interface | Methods |
 |---|---|
-| `IProductRepository` | `save`, `deleteById`, `findById`, `findAll`, `findAllActive` |
+| `IProductRepository` | `save`, `deleteById`, `findById`, `findAll`, `findAllActive`, `update` |
 | `IUserRepository` | `save`, `deleteById`, `findById`, `findByEmail` |
-| `IOrderRepository` | `save`, `findById`, `findByUserId` / `findAll`, `updateStatus`, `updatePaymentIntentId` |
+| `IOrderRepository` | `save`, `findById`, `findByUserEmail`, `getAll`, `updateStatus`, `updatePaymentIntentId` |
 
 ## REST API Endpoints
 
@@ -89,15 +89,17 @@ All models use Lombok: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsCons
 | POST | `/api/auth/login` | Login → returns JWT |
 | GET | `/api/auth/{email}` | Find user by email |
 | DELETE | `/api/auth/{id}` | Delete user |
-| POST | `/api/products` | Create product |
+| POST | `/api/products` | Create product (ADMIN) |
 | GET | `/api/products` | List all products |
 | GET | `/api/products/active` | List active products |
 | GET | `/api/products/{id}` | Get product by id |
-| DELETE | `/api/products/{id}` | Soft-delete product |
-| POST | `/api/orders` | Create order |
+| DELETE | `/api/products/{id}` | Soft-delete product (ADMIN) |
+| PATCH | `/api/products/{id}/stock` | Update product stock (ADMIN) — body: `{"stock": N}` |
+| POST | `/api/orders` | Create order (CLIENT) |
+| GET | `/api/orders` | List all orders (ADMIN) |
 | GET | `/api/orders/{id}` | Get order by id |
-| GET | `/api/orders/user/{userId}` | Get orders by user |
-| PUT | `/api/orders/{orderId}/status` | Update order status (`?status=PENDING\|PAID\|CANCELLED`) |
+| GET | `/api/orders/user` | Get orders of the authenticated user (email from JWT) |
+| PUT | `/api/orders/{orderId}/status` | Update order status (ADMIN) — `?status=PENDING\|PAID\|CANCELLED` |
 | POST | `/api/payments/{orderId}` | Create Stripe PaymentIntent for an order (CLIENT) |
 | POST | `/api/webhooks/stripe` | Handle Stripe webhook events (public) |
 
@@ -105,7 +107,7 @@ All models use Lombok: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsCons
 
 JWT-based authentication via `JwtService` and `JwtAuthFilter`. Tokens include email and role claims. Configuration in `config/SecurityConfig.java`.
 
-`/api/payments/**` requires `CLIENT` role. `/api/webhooks/**` is public (validated by Stripe signature).
+`/api/payments/**` requires `CLIENT` role. `/api/webhooks/**` is public (validated by Stripe signature). CORS is enabled for `http://localhost:5173`.
 
 ## Tech Stack
 

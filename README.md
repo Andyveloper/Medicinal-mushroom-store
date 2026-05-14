@@ -63,22 +63,24 @@ La API queda disponible en `http://localhost:8080`.
 
 ### Productos (`/api/products`)
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/products` | Crear producto |
-| GET | `/api/products` | Listar todos los productos |
-| GET | `/api/products/active` | Listar productos activos |
-| GET | `/api/products/{id}` | Obtener producto por id |
-| DELETE | `/api/products/{id}` | Eliminar producto (soft delete) |
+| Método | Ruta | Rol | Descripción |
+|--------|------|-----|-------------|
+| POST | `/api/products` | ADMIN | Crear producto |
+| GET | `/api/products` | — | Listar todos los productos |
+| GET | `/api/products/active` | — | Listar productos activos |
+| GET | `/api/products/{id}` | — | Obtener producto por id |
+| DELETE | `/api/products/{id}` | ADMIN | Eliminar producto (soft delete) |
+| PATCH | `/api/products/{id}/stock` | ADMIN | Actualizar stock — body: `{"stock": N}` |
 
 ### Órdenes (`/api/orders`)
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/orders` | Crear orden |
-| GET | `/api/orders/{id}` | Obtener orden por id |
-| GET | `/api/orders/user/{userId}` | Listar órdenes de un usuario |
-| PUT | `/api/orders/{orderId}/status` | Actualizar estado (`?status=PENDING\|PAID\|CANCELLED`) |
+| Método | Ruta | Rol | Descripción |
+|--------|------|-----|-------------|
+| POST | `/api/orders` | CLIENT | Crear orden |
+| GET | `/api/orders` | ADMIN | Listar todas las órdenes |
+| GET | `/api/orders/{id}` | CLIENT / ADMIN | Obtener orden por id |
+| GET | `/api/orders/user` | CLIENT | Listar órdenes del usuario autenticado (email del JWT) |
+| PUT | `/api/orders/{orderId}/status` | ADMIN | Actualizar estado (`?status=PENDING\|PAID\|CANCELLED`) |
 
 ### Pagos (`/api/payments`)
 
