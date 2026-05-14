@@ -7,12 +7,17 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record OrderResponse(Long id, Long userId, BigDecimal totalPrice, OrderStatus status, LocalDateTime createdAt,
+public record OrderResponse(Long id, Long userId, String userEmail, String userName, Long userPhone,
+                            BigDecimal totalPrice,
+                            OrderStatus status, LocalDateTime createdAt,
                             List<OrderItemResponse> items) {
   public OrderResponse(Order order) {
     this(
             order.getId(),
             order.getUser().getId(),
+            order.getUser().getEmail(),
+            order.getUser().getName() + " " + order.getUser().getLastname(),
+            order.getUser().getPhoneNumber(),
             order.getTotalPrice(),
             order.getStatus(),
             order.getCreatedAt(),
