@@ -34,10 +34,12 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("CLIENT")
+                    .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("CLIENT")
                     .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyRole("CLIENT", "ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST, "/api/payments/**").hasRole("CLIENT")
